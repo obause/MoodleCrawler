@@ -42,7 +42,7 @@ class CourseFetcher:
                 course.click()
                 break
 
-        #Alle Einträge, die als Resource gekennzeichnet sind herunterladen
+        #Alle Einträge, die als Resource gekennzeichnet sind herunterladen f
         for resource in driver.find_elements_by_css_selector(".modtype_resource"):
             link = resource.find_element_by_css_selector(".aalink")
             link.click()
