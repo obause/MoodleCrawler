@@ -5,6 +5,6 @@ executable_path = 'chromedriver/chromedriver.exe'
 
 moodle_home = 'https://moodle.hs-hannover.de/login'
 
-username = 'hk7-bdq-u1'
+username = 'username'
 
-password = 'Ruamzuzla9078#'
+password = 'password'

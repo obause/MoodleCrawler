@@ -18,6 +18,7 @@ class CourseFetcher:
             "plugins.always_open_pdf_externally": True
         })
         driver = webdriver.Chrome(options=chrome_options, executable_path=executable_path)
+
         #Login auf der Startseite
         print("Einloggen...")
         url = moodle_home
