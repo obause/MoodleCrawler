@@ -6,8 +6,10 @@ from .CrawledCourse import CrawledCourse
 
 class CourseFetcher:
     def get_courses(self, name):
+        print("Starte Chrome-Instanz...")
         chrome_options = Options()
         chrome_options.add_argument("--incognito")
+        #chrome_options.add_argument("--headless")
         chrome_options.add_argument("--window-size=1920x1080")
         chrome_options.add_experimental_option("prefs", {
             "download.default_directory": "E:\\Daten\\Crawler", #Download-Speicherort
@@ -16,8 +18,9 @@ class CourseFetcher:
             "plugins.always_open_pdf_externally": True
         })
         driver = webdriver.Chrome(options=chrome_options,
-                                  executable_path="E:\Programmieren\Python\PycharmProjects\MoodleCrawler\chromedriver.exe")
+                                  executable_path="E:\Programmieren\Python\PycharmProjects\MoodleCrawler\chromedriver\chromedriver.exe")
         #Login auf der Startseite
+        print("Einloggen...")
         url = "https://moodle.hs-hannover.de/login"
         driver.get(url)
 
@@ -35,17 +38,39 @@ class CourseFetcher:
         password.send_keys("Ruamzuzla9078#")
         submit.click()
 
-        #Kurs auswählen
+        #Kursliste ausgeben
+        print("Kurse sammeln...")
+        courses = []
+        count = 0
         for course in driver.find_elements_by_css_selector(".coursebox"):
-            print(course.text)
-            if course.text == name:
-                course.click()
-                break
+            if course.text != "":
+                title = course.text
+                url = course.find_element_by_css_selector("a").get_attribute("href")
+                item = CrawledCourse(title, url)
+                courses.append(item)
+                print(str(count) +": " + course.text.strip())
+                print(course.find_element_by_css_selector("a").get_attribute("href"))
+                count += 1
 
-        #Alle Einträge, die als Resource gekennzeichnet sind herunterladen f
+        course_number = int(input("Kursnummer auswählen: "))
+
+        #Ausgewählten Kurs aufrufen
+        print("Kurs aufrufen...")
+        driver.get(courses[course_number].url)
+
+        folders = []
+        for folder in driver.find_elements_by_css_selector(".modtype_resource"):
+            None
+
+        download_folders = int(input(("Ordner gefunden! Ordner als zip herunterladen? (Ja/Nein)")))
+
+        #Alle Einträge, die als Resource gekennzeichnet sind herunterladen
+        print("Lade Dateien herunter...")
         for resource in driver.find_elements_by_css_selector(".modtype_resource"):
             link = resource.find_element_by_css_selector(".aalink")
             link.click()
+
+        #Ordner herunterladen
 
         time.sleep(2)
 
