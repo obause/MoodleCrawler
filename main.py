@@ -1,5 +1,5 @@
-import crawler
+from crawler.CourseFetcher import CourseFetcher
 
-fetcher = crawler.CourseFetcher()
+fetcher = CourseFetcher()
 
-fetcher.get_courses("BIS Statistik: Vorleistung WiSe 2020/21, Autenrieth")
+fetcher.get_courses()

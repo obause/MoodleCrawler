@@ -1,41 +1,39 @@
-import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-from .CrawledCourse import CrawledCourse
+from crawler.CrawledCourse import CrawledCourse
+from config import download_directory, executable_path, moodle_home, username, password
 
 class CourseFetcher:
-    def get_courses(self, name):
+    def get_courses(self):
         print("Starte Chrome-Instanz...")
         chrome_options = Options()
         chrome_options.add_argument("--incognito")
-        #chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--window-size=1920x1080")
         chrome_options.add_experimental_option("prefs", {
-            "download.default_directory": "E:\\Daten\\Crawler", #Download-Speicherort
+            "download.default_directory": download_directory, #Download-Speicherort
             "download.prompt_for_download": False,              #Speicherfenster deaktivieren
             "download.directory_upgrade": True,
             "plugins.always_open_pdf_externally": True
         })
-        driver = webdriver.Chrome(options=chrome_options,
-                                  executable_path="E:\Programmieren\Python\PycharmProjects\MoodleCrawler\chromedriver\chromedriver.exe")
+        driver = webdriver.Chrome(options=chrome_options, executable_path=executable_path)
         #Login auf der Startseite
         print("Einloggen...")
-        url = "https://moodle.hs-hannover.de/login"
+        url = moodle_home
         driver.get(url)
 
         elements = driver.find_elements_by_css_selector("#username")
-        username = elements[0]
+        username_field = elements[0]
         elements = driver.find_elements_by_css_selector("#password")
-        password = elements[0]
+        password_field = elements[0]
         elements = driver.find_elements_by_css_selector("#loginbtn")
         submit = elements[0]
 
-        username.clear()
-        user_name = "hk7-bdq-u1"
-        username.send_keys(user_name)
-        password.clear()
-        password.send_keys("Ruamzuzla9078#")
+        username_field.clear()
+        username_field.send_keys(username)
+        password_field.clear()
+        password_field.send_keys(password)
         submit.click()
 
         #Kursliste ausgeben
@@ -49,7 +47,7 @@ class CourseFetcher:
                 item = CrawledCourse(title, url)
                 courses.append(item)
                 print(str(count) +": " + course.text.strip())
-                print(course.find_element_by_css_selector("a").get_attribute("href"))
+                #print(course.find_element_by_css_selector("a").get_attribute("href"))
                 count += 1
 
         course_number = int(input("Kursnummer auswählen: "))
@@ -59,10 +57,12 @@ class CourseFetcher:
         driver.get(courses[course_number].url)
 
         folders = []
-        for folder in driver.find_elements_by_css_selector(".modtype_resource"):
-            None
+        for folder in driver.find_elements_by_css_selector(".modtype_folder"):
+            link = folder.find_element_by_css_selector(".aalink").get_attribute("href")
+            folders.append(link)
 
-        download_folders = int(input(("Ordner gefunden! Ordner als zip herunterladen? (Ja/Nein)")))
+        if len(folders) >= 1:
+            download_folders = input(("Ordner gefunden! Alle Ordner einzeln als zip herunterladen? (Ja/Nein): "))
 
         #Alle Einträge, die als Resource gekennzeichnet sind herunterladen
         print("Lade Dateien herunter...")
@@ -71,8 +71,13 @@ class CourseFetcher:
             link.click()
 
         #Ordner herunterladen
+        if download_folders == "Ja" or download_folders == "ja":
+            print("Lade Ordner herunter...")
+            for link in folders:
+                driver.get(link)
+                driver.find_element_by_css_selector(".btn-secondary").click()
 
-        time.sleep(2)
+        input("Alle Dateien heruntergeladen. Beliebeige Taste drücken zum beenden.")
 
 
 
